@@ -405,7 +405,14 @@ gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow
 
 **Fix**: This is expected. Pick one counter for the badge and document it.
 
----
+### Pitfall 10 — Coverage workflow fails on main after a dependency merge
+
+**Symptom**: All CI checks passed on the PR branch, but after merging to `main` the `coverage-pages` job fails.
+
+**Cause**: The merged state on `main` is different from the PR head (e.g., a frontend build-tool major-version bump changes the coverage report layout, or a CI workflow change on `main` is not reflected in the PR branch).
+
+**Fix**: After merging, watch the first `main` run and verify `coverage-pages` succeeds. For PRs that touch frontend tooling (Vite, Vitest, etc.), update the branch to include latest `main` before merging so the CI run is representative.
+
 
 ## Verification
 
@@ -416,6 +423,7 @@ After the first CI run:
 3. `https://<owner>.github.io/<repo>/frontend/coverage.html` shows the Vitest report.
 4. `https://<owner>.github.io/<repo>/backend/index.html` returns 404 if the user requested the slot freed.
 5. README badges are clickable and lead to the reports.
+6. After merging a PR that touches frontend tooling or CI, verify the next `main` run’s `coverage-pages` job succeeds.
 
 ---
 
@@ -441,3 +449,4 @@ After each successful run:
 - Deployed to `https://oci-j.github.io/funeral/`.
 - Badges wrapped in Markdown links.
 - Report entry renamed to `coverage.html` to free the `index.html` slot.
+- After merging PR #28 (Vite 5.4.21 → 8.1.4), the next `main` run’s `coverage-pages` job succeeded, confirming the frontend coverage pipeline still worked.
